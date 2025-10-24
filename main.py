@@ -6,6 +6,7 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from webdriver_manager.chrome import ChromeDriverManager
 from selenium.common.exceptions import TimeoutException
+import time
 
 APP_URLS = [
     "https://askdata-rag-llm.streamlit.app/",
@@ -24,23 +25,33 @@ def wake_app(url):
         driver.get(url)
         wait = WebDriverWait(driver, 60)
         try:
-            # Try simpler: find all buttons and click the right one by text
+            # Find all buttons, click the one containing 'get this app back up'
             buttons = wait.until(
                 EC.presence_of_all_elements_located((By.TAG_NAME, "button"))
             )
             found = False
             for button in buttons:
-                if "wake this app back up" in button.text.lower() or "get this app back up" in button.text.lower():
+                if "get this app back up" in button.text.lower():
                     button.click()
                     found = True
                     print(f"Clicked wake button for {url}")
                     break
-            if found:
-                print(f"{url} — Woken successfully ✅")
-            else:
-                print(f"{url} — Wake button not found, app may be already awake or button unrecognized ❗")
+            time.sleep(5)  # Wait for wake-up action to process
+
+            # Take a screenshot
+            driver.save_screenshot("after_click.png")
+            print(f"Screenshot taken for {url} after wake attempt.")
+
+            # Wait for an app element to verify the app woke up (e.g., Streamlit sidebar)
+            try:
+                wait.until(
+                    EC.presence_of_element_located((By.CSS_SELECTOR, "[data-testid='stSidebar']"))
+                )
+                print(f"{url} — App sidebar detected, app woke successfully ✅")
+            except TimeoutException:
+                print(f"{url} — App sidebar NOT detected, app may NOT be awake ❗")
         except TimeoutException:
-            print(f"{url} — No buttons found (timeout), already awake or page load issue ❗")
+            print(f"{url} — No wake-up button found (timeout or already awake) ❗")
     except Exception as e:
         print(f"Error with {url}: {e}")
     finally:
