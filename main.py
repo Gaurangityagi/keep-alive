@@ -24,14 +24,23 @@ def wake_app(url):
         driver.get(url)
         wait = WebDriverWait(driver, 60)
         try:
-            button = wait.until(
-                EC.element_to_be_clickable((By.XPATH, "//button[contains(text(),'Yes, get this app back up')]"))
+            # Try simpler: find all buttons and click the right one by text
+            buttons = wait.until(
+                EC.presence_of_all_elements_located((By.TAG_NAME, "button"))
             )
-            button.click()
-            wait.until(EC.invisibility_of_element_located((By.XPATH, "//button[contains(text(),'Yes, get this app back up')]")))
-            print(f"{url} — Woken successfully ✅")
+            found = False
+            for button in buttons:
+                if "wake this app back up" in button.text.lower() or "get this app back up" in button.text.lower():
+                    button.click()
+                    found = True
+                    print(f"Clicked wake button for {url}")
+                    break
+            if found:
+                print(f"{url} — Woken successfully ✅")
+            else:
+                print(f"{url} — Wake button not found, app may be already awake or button unrecognized ❗")
         except TimeoutException:
-            print(f"{url} — No wake-up button found, already awake ✅")
+            print(f"{url} — No buttons found (timeout), already awake or page load issue ❗")
     except Exception as e:
         print(f"Error with {url}: {e}")
     finally:
