@@ -1,9 +1,9 @@
-name: Wake Streamlit App
+name: Wake Streamlit Apps
 
 on:
   schedule:
-    - cron: "0 */4 * * *" # run every 4 hours
-  workflow_dispatch: # allows manual trigger
+    - cron: "0 */4 * * *" # every 4 hours
+  workflow_dispatch:
 
 jobs:
   wake:
@@ -23,7 +23,5 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
 
-      - name: Run Selenium script
-        env:
-          STREAMLIT_APP_URL: "https://your-app-name.streamlit.app/"
+      - name: Wake Both Apps
         run: python main.py
