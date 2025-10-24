@@ -22,7 +22,7 @@ def wake_app(url):
     driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=options)
     try:
         driver.get(url)
-        wait = WebDriverWait(driver, 15)
+        wait = WebDriverWait(driver, 60)
         try:
             button = wait.until(
                 EC.element_to_be_clickable((By.XPATH, "//button[contains(text(),'Yes, get this app back up')]"))
